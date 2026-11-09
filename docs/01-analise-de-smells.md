@@ -2,73 +2,189 @@
 
 ## Objetivo
 
-Registrar os problemas de organização encontrados na versão inicial do ClinicFlow. A análise considera os conceitos estudados em aula e evita classificar trechos como Code Smell quando não há evidência suficiente.
+Registrar os problemas de organização identificados na versão inicial do ClinicFlow e apresentar as melhorias realizadas durante as refatorações. A análise considera o código da branch `original` e compara sua estrutura com a versão atual da `main`.
 
 ## Versão analisada
 
-- Repositório: https://github.com/Freitas86/CLEAN_CODE_PROJETO_FINAL
-- Branch de referência: `original`
-- Commit: `a7f12fbe489e0b1894cb605a7ffe88960c4750bf`
+- Repositório: [CLEAN_CODE_PROJETO_FINAL](https://github.com/Freitas86/CLEAN_CODE_PROJETO_FINAL)
+- Versão original: branch `original`.
+- Commit original: `a7f12fbe489e0b1894cb605a7ffe88960c4750bf`.
+- Versão refatorada: branch `main`.
 
-## Itens identificados
+## Code Smells identificados
 
-| ID | Code Smell | Categoria | Evidência inicial | Situação |
+| ID | Code Smell | Categoria | Evidência na versão original | Situação |
 |---|---|---|---|---|
-| CF-01 | Large Class | Inchaços | `App.tsx` concentra estado, persistência, regras de interação, navegação e várias partes da interface. | Identificado |
-| CF-02 | Long Method | Inchaços | A função principal `App()` reúne muitos estados, efeitos, funções de manipulação e uma estrutura extensa de JSX. | Identificado |
-| CF-03 | Long Parameter List | Inchaços | O componente `Dashboard` recebe várias propriedades para apresentar dados e executar ações. | Identificado |
-| CF-04 | Switch Statements | Abusos da OO | A seleção e apresentação de páginas utiliza condicionais baseadas no valor de `activePage`. | Candidato; validar se a complexidade justifica a classificação |
-| CF-05 | Divergent Change | Impedidores de Mudança | `App.tsx` concentra responsabilidades diferentes, fazendo com que alterações de áreas distintas possam exigir mudanças no mesmo arquivo. | Identificado como concentração de responsabilidades |
-| CF-06 | Duplicate Code | Dispensáveis | Existem três efeitos semelhantes em `App.tsx` para persistir pacientes, consultas e prontuários no `localStorage`. | Identificado |
-| CF-07 | Feature Envy | Acopladores | `getPatientName()` consulta uma lista de pacientes recebida como parâmetro para obter o nome correspondente. | Candidato; evidência ainda fraca |
+| CF-01 | Large Class | Inchaços | `App.tsx` concentrava estados, persistência, ações e páginas. | Melhorado |
+| CF-02 | Long Method | Inchaços | A função `App()` reunia diversas operações e uma estrutura extensa de interface. | Melhorado, ainda existe concentração de responsabilidades. |
+| CF-03 | Long Parameter List | Inchaços | `Dashboard` recebia oito propriedades individualmente. | Melhorado na PR #11. |
+| CF-04 | Switch Statements | Abusos da OO | A navegação utilizava condicionais simples, sem estrutura `switch/case`. | Não confirmado como Code Smell. |
+| CF-05 | Divergent Change | Impedidores de Mudança | Alterações em diferentes responsabilidades frequentemente exigiam modificações em `App.tsx`. | Melhorado. |
+| CF-06 | Duplicate Code | Dispensáveis | Três efeitos separados realizavam a persistência de pacientes, consultas e evoluções. | Resolvido com `useLocalStorage`. |
+| CF-07 | Feature Envy | Acopladores | `getPatientName()` consultava a lista de pacientes recebida como parâmetro. | Não confirmado como Code Smell. |
 
-## Observações sobre o diagnóstico
+A análise foi conservadora: os itens CF-04 e CF-07 foram mantidos como possibilidades investigadas, mas não foram apresentados como problemas comprovados.
 
-Os componentes `Sidebar.tsx` e `Modal.tsx` foram analisados e não apresentaram problemas relevantes que justifiquem uma refatoração específica. O primeiro concentra a navegação lateral; o segundo cuida da apresentação e do fechamento de uma janela modal.
+## Principais refatorações
 
-As interfaces e tipos declarados em `types.ts` também não foram classificados automaticamente como `Data Class`. Em TypeScript, declarar interfaces para representar estruturas de dados é uma prática comum e, isoladamente, não caracteriza um problema.
+### CF-01 — Large Class
 
-O CF-04 e o CF-07 precisam ser tratados com cuidado. A presença de condicionais não significa, por si só, que exista `Switch Statements`; é necessário avaliar se há lógica de seleção que tende a crescer e dificulta a manutenção. Da mesma forma, uma função que recebe uma lista como parâmetro não caracteriza automaticamente `Feature Envy`.
+**Problema encontrado**
 
-## Direção das refatorações
+O arquivo `App.tsx` concentrava responsabilidades diferentes, como controle de estado, persistência, operações de cadastro e apresentação das páginas.
 
-As mudanças devem ser feitas em etapas pequenas, mantendo os testes como proteção do comportamento existente. A prioridade inicial é reduzir a concentração de responsabilidades em `App.tsx`, reaproveitar a lógica de persistência e simplificar a passagem de propriedades quando isso trouxer benefício real.
+**Técnica aplicada**
 
-Não considerar um item como resolvido apenas porque o código foi movido para outro arquivo. A refatoração precisa melhorar a organização e manter o comportamento esperado.
+Extração de componentes e separação de responsabilidades em módulos próprios.
+
+**Resultado**
+
+As páginas, formulários e componentes compartilhados passaram a ter arquivos próprios. O `App.tsx` continua coordenando a aplicação, mas deixou de concentrar toda a implementação.
+
+**Evidência**
+
+- Antes: `src/App.tsx` na branch `original`.
+- Depois: `src/components/`.
+- PRs #5, #7 e #8.
+
+### CF-02 — Long Method
+
+**Problema encontrado**
+
+A função principal `App()` acumulava estados, funções de manipulação e uma estrutura extensa de interface.
+
+**Técnica aplicada**
+
+Extração de componentes e funções para reduzir o tamanho e separar responsabilidades.
+
+**Resultado**
+
+A implementação das páginas e dos formulários foi distribuída em componentes específicos. A função principal ainda mantém a coordenação geral do sistema, portanto a melhoria é parcial.
+
+**Evidência**
+
+- Antes: `src/App.tsx` na branch `original`.
+- Depois: `src/components/`.
+- PRs #5, #7 e #8.
+
+### CF-03 — Long Parameter List
+
+**Problema encontrado**
+
+O componente `Dashboard` recebia oito propriedades individualmente, misturando informações e funções de ação.
+
+**Técnica aplicada**
+
+Introdução de objeto de parâmetros (*Introduce Parameter Object*).
+
+**Antes**
+
+O componente recebia propriedades como `patients`, `appointments`, `activePatients`, `completed`, `upcoming`, `onNewAppointment`, `onNewPatient` e `onFinish`.
+
+**Depois**
+
+As propriedades foram agrupadas em dois objetos:
+
+- `data`: informações utilizadas pelo painel.
+- `actions`: funções executadas pelas ações do painel.
+
+**Resultado**
+
+A chamada do componente ficou mais organizada e os parâmetros passaram a ter agrupamentos por finalidade.
+
+**Evidência**
+
+- Arquivo: `src/components/Dashboard.tsx`.
+- PR #11: [Agrupamento dos parâmetros do Dashboard](https://github.com/Freitas86/CLEAN_CODE_PROJETO_FINAL/pull/11).
+
+### CF-05 — Divergent Change
+
+**Problema encontrado**
+
+O `App.tsx` reunia responsabilidades diferentes. Isso aumentava a possibilidade de alterações em funcionalidades distintas exigirem modificações no mesmo arquivo.
+
+**Técnica aplicada**
+
+Extração de componentes e separação das responsabilidades.
+
+**Resultado**
+
+Páginas, formulários e elementos compartilhados passaram a ser mantidos em arquivos específicos. Isso reduz a concentração de mudanças no componente principal.
+
+**Evidência**
+
+- Arquivo original: `src/App.tsx`.
+- Estrutura atual: `src/components/`, `src/hooks/` e `src/utils/`.
+- PRs #5, #6, #7 e #8.
+
+### CF-06 — Duplicate Code
+
+**Problema encontrado**
+
+A versão original possuía três efeitos separados para salvar pacientes, consultas e evoluções no `localStorage`.
+
+**Técnica aplicada**
+
+Extração da lógica repetida para uma função reutilizável, implementada como hook personalizado.
+
+**Resultado**
+
+A persistência passou a ser centralizada em `useLocalStorage`, reduzindo a repetição da mesma lógica.
+
+**Evidência**
+
+- Antes: três efeitos em `src/App.tsx`.
+- Depois: `src/hooks/useLocalStorage.ts`.
+- PR #6.
+
+## Refatoração adicional: simplificação dos status
+
+Além dos itens analisados, foi simplificada a condição ternária encadeada utilizada para definir as classes CSS dos status das consultas.
+
+**Antes**
+
+A lógica verificava individualmente se a consulta estava concluída, cancelada ou agendada.
+
+**Depois**
+
+Foi criado o objeto `STATUS_CLASSES`, que relaciona cada status à respectiva classe CSS.
+
+**Resultado**
+
+A associação ficou mais direta e o comportamento passou a ser verificado por teste automatizado.
+
+**Evidência**
+
+- Arquivo: `src/components/Appointments.tsx`.
+- PR #12: [Simplificação dos status das consultas](https://github.com/Freitas86/CLEAN_CODE_PROJETO_FINAL/pull/12).
+- Teste: `src/components/Appointments.test.tsx`.
+
+## Resultado geral
+
+| Item | Resultado |
+|---|---|
+| CF-01 | Melhorou a distribuição das responsabilidades. |
+| CF-02 | Reduziu a extensão e a concentração da implementação. |
+| CF-03 | Agrupou os parâmetros do Dashboard em dois objetos. |
+| CF-04 | Não confirmado; não foi identificado `switch/case` na navegação. |
+| CF-05 | Reduziu a concentração de responsabilidades no arquivo principal. |
+| CF-06 | Centralizou a persistência e eliminou a repetição dos três efeitos. |
+| CF-07 | Não confirmado; a função auxiliar realiza uma busca simples na lista recebida. |
+
+A análise identificou cinco problemas com evidências suficientes e duas possibilidades que não foram confirmadas. A simplificação da condição dos status também foi realizada como melhoria adicional.
 
 ## Evidências
 
-- Arquivo principal analisado: `src/App.tsx`.
-- Componentes também analisados: `src/components/Sidebar.tsx` e `src/components/Modal.tsx`.
-- Tipos e dados iniciais: `src/types.ts` e `src/data/seed.ts`.
-- Referência conceitual: material de aula `topico10-code_smells.pdf`.
+- Versão original: branch `original`.
+- Versão atual: branch `main`.
+- PR #5: extração de componentes.
+- PR #6: centralização da persistência.
+- PR #7: separação das páginas.
+- PR #8: separação dos formulários.
+- PR #11: agrupamento dos parâmetros do Dashboard.
+- PR #12: simplificação dos status e teste automatizado.
+- Testes: `npm test`.
 
 ## Roteiro de 1 minuto
 
-Na análise inicial, o principal ponto encontrado foi a concentração de responsabilidades no `App.tsx`. A função principal controla estados, persistência e várias partes da interface. Também existem três efeitos semelhantes para salvar dados no armazenamento local e um componente que recebe várias propriedades. Alguns outros itens foram mantidos como candidatos, porque não basta encontrar uma condicional ou uma função que consulta uma lista para afirmar que existe um Code Smell. A ideia é refatorar somente o que tiver justificativa no código.
-
-## Situação após as refatorações
-
-Após as alterações realizadas no projeto, os itens identificados inicialmente foram revisados considerando a estrutura atual do código.
-
-| ID | Code Smell | Situação atual | Justificativa |
-|---|---|---|---|
-| CF-01 | Large Class | Melhorado | Parte das responsabilidades que estavam concentradas no `App.tsx` foi distribuída entre componentes, hooks e módulos auxiliares. |
-| CF-02 | Long Method | Melhorado, mas ainda presente | A extração das páginas e dos formulários reduziu o tamanho da função principal. Mesmo assim, `App()` ainda reúne estados, funções de manipulação e a montagem da interface. |
-| CF-03 | Long Parameter List | Candidato | O `Dashboard` recebe oito propriedades. Entretanto, elas possuem finalidades distintas e são utilizadas pelo componente. Não foi realizada uma alteração apenas para reduzir essa quantidade. |
-| CF-04 | Switch Statements | Não confirmado | A seleção das páginas utiliza condicionais com `activePage`. A lógica atual é simples e não apresenta complexidade suficiente para justificar uma refatoração específica. |
-| CF-05 | Divergent Change | Melhorado | A separação das páginas, formulários e elementos compartilhados reduziu a necessidade de concentrar alterações de diferentes áreas no `App.tsx`. |
-| CF-06 | Duplicate Code | Resolvido | Os efeitos semelhantes de persistência foram substituídos pelo hook `useLocalStorage.ts`, que centraliza essa responsabilidade. |
-| CF-07 | Feature Envy | Não confirmado | A função `getPatientName()` realiza uma busca simples na lista de pacientes. Não há evidência suficiente de que esteja assumindo responsabilidades inadequadas. |
-
-### Resultado das refatorações
-
-A principal mudança foi a redução da concentração de responsabilidades no arquivo `App.tsx`. As páginas e os formulários passaram a ter componentes próprios, os elementos visuais compartilhados foram organizados em `Shared.tsx` e a persistência dos dados foi centralizada em um hook.
-
-O `App.tsx` ainda mantém a coordenação geral da aplicação, incluindo estados, operações e navegação. Portanto, os itens CF-01 e CF-02 foram melhorados, mas não devem ser considerados completamente eliminados.
-
-O item CF-06 foi resolvido com a criação do hook de persistência. Os itens CF-03, CF-04 e CF-07 foram mantidos como candidatos ou não confirmados, pois não foi encontrada justificativa suficiente para realizar novas alterações.
-
-### Roteiro atualizado para apresentação
-
-Na análise inicial, encontramos uma concentração de responsabilidades no `App.tsx`, além de trechos semelhantes responsáveis pela persistência dos dados. Durante as refatorações, separamos as páginas, os formulários e os componentes compartilhados, além de criar um hook para centralizar o armazenamento local. Com isso, conseguimos melhorar a organização do projeto e resolver a duplicação da persistência. Alguns pontos permaneceram como candidatos, porque não apresentavam evidências suficientes para justificar novas alterações. A intenção foi melhorar o código sem modificar partes que já estavam funcionando corretamente.
+Na análise inicial, identificamos concentração de responsabilidades no `App.tsx`, repetição na persistência e excesso de parâmetros no Dashboard. Durante as refatorações, extraímos componentes, centralizamos o armazenamento em um hook e agrupamos os parâmetros do painel. Também simplificamos a lógica dos status das consultas. Dois itens inicialmente considerados foram descartados como Code Smells por falta de evidência suficiente.

@@ -1,26 +1,128 @@
-# Documentação técnica — ClinicFlow
+# ClinicFlow
 
-Esta pasta reúne a documentação técnica do projeto ClinicFlow, desenvolvido e analisado na disciplina de Clean Code.
+Aplicação web demonstrativa para gerenciamento de pacientes, consultas e registros de atendimento, desenvolvida com React, TypeScript e Vite.
 
-## Documentos
+> **Aviso:** o projeto utiliza dados fictícios e armazenamento local no navegador. Não utilize informações reais de pacientes. Não é um prontuário clínico certificado nem substitui sistemas que atendam aos requisitos legais e de segurança aplicáveis.
 
-1. [Análise de Code Smells](01-analise-de-smells.md) — problemas identificados no código e pontos que ainda precisam de validação.
-2. [Cobertura de testes](02-cobertura-de-testes.md) — testes existentes, resultados da linha de base e estratégia de validação.
-3. [Ferramentas](03-ferramentas.md) — tecnologias e ferramentas utilizadas no desenvolvimento e na análise.
-4. [Arquitetura e dependências](04-arquitetura-e-dependencias.md) — organização atual do sistema, fluxo de dados e dependências.
-5. [Repositório](05-repositorio.md) — branches, histórico de PRs e fluxo de trabalho adotado.
-6. [Documentação](06-documentacao.md) — organização dos documentos e orientações para manter os registros atualizados.
+## Funcionalidades
 
-## Situação desta documentação
+- Dashboard com indicadores e agenda do dia.
+- Cadastro e listagem de pacientes.
+- Busca de pacientes por nome, e-mail ou telefone.
+- Agendamento, conclusão e cancelamento de consultas.
+- Registro e consulta de evoluções demonstrativas.
+- Persistência dos dados no `localStorage`.
 
-Os resultados apresentados como linha de base correspondem às medições realizadas antes das refatorações planejadas. Os itens identificados como candidatos ou pendentes ainda precisam ser confirmados durante a implementação.
+## Tecnologias
 
-## Evidências
+- React 18
+- TypeScript
+- Vite
+- Lucide React
+- ESLint
+- Vitest
+- React Testing Library
+- Husky
+- GitHub Actions
 
-- Repositório: https://github.com/Freitas86/CLEAN_CODE_PROJETO_FINAL
-- Branch de trabalho desta documentação: `docs/documentacao-tecnica`
-- Versão original analisada: `a7f12fbe489e0b1894cb605a7ffe88960c4750bf`
+## Requisitos
 
-## Roteiro de 1 minuto
+- Node.js 20.19+ ou 22.12+.
+- npm.
 
-O ClinicFlow é um sistema demonstrativo para gerenciamento de rotinas de uma clínica. Esta documentação apresenta o diagnóstico inicial do código, os resultados dos testes, as ferramentas utilizadas, a arquitetura e o fluxo de trabalho no Git. Os números apresentados são da versão de referência, antes das refatorações. Assim, será possível comparar os resultados e verificar se as mudanças melhoraram a organização sem alterar o comportamento esperado.
+## Instalação e execução
+
+Clone o repositório e acesse a pasta do projeto. Instale as dependências:
+
+```bash
+npm ci
+```
+
+Inicie o servidor:
+
+```bash
+npm run dev
+```
+
+Abra no navegador o endereço apresentado pelo Vite.
+
+## Testes e qualidade
+
+Execute os testes:
+
+```bash
+npm test
+```
+
+Gere o relatório de cobertura:
+
+```bash
+npm run test:coverage
+```
+
+Execute o ESLint:
+
+```bash
+npm run lint
+```
+
+Verifique a compilação:
+
+```bash
+npm run build
+```
+
+O relatório HTML de cobertura é gerado na pasta `coverage/`.
+
+O projeto possui um hook do Husky que executa lint e testes antes dos commits. O GitHub Actions também executa lint, testes e build em pushes e pull requests direcionados à branch `main`.
+
+## Dados de demonstração
+
+O sistema inicia com pacientes, consultas e evoluções fictícias. Os dados criados ou alterados são armazenados no navegador atual por meio do `localStorage`.
+
+Para restaurar os dados iniciais, limpe o armazenamento local do site nas ferramentas de desenvolvedor do navegador.
+
+## Estrutura do projeto
+
+```text
+src/
+├── components/
+│   ├── AppointmentForm.tsx
+│   ├── Appointments.tsx
+│   ├── Appointments.test.tsx
+│   ├── Dashboard.tsx
+│   ├── Modal.tsx
+│   ├── NoteForm.tsx
+│   ├── PatientForm.tsx
+│   ├── Patients.tsx
+│   ├── Records.tsx
+│   ├── Shared.tsx
+│   └── Sidebar.tsx
+├── data/
+│   └── seed.ts
+├── hooks/
+│   └── useLocalStorage.ts
+├── test/
+│   └── setup.ts
+├── utils/
+│   └── clinicHelpers.ts
+├── App.test.tsx
+├── App.tsx
+├── main.tsx
+├── styles.css
+└── types.ts
+```
+
+## Documentação do projeto
+
+A documentação das análises, testes, ferramentas, arquitetura, repositório e processo de desenvolvimento está disponível na pasta [`docs/`](docs/README.md).
+
+O diagnóstico e o planejamento inicial estão registrados em [`ENTREGA_01_DOSSIE.md`](ENTREGA_01_DOSSIE.md).
+
+## Contexto acadêmico
+
+O ClinicFlow foi utilizado como base para aplicar princípios e práticas de Clean Code, incluindo identificação de Code Smells, refatorações, testes automatizados e documentação das alterações.
+
+## Licença
+
+Este projeto está licenciado sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE).

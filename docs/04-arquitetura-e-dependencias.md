@@ -2,9 +2,9 @@
 
 ## Visão geral
 
-O ClinicFlow é uma aplicação web demonstrativa desenvolvida com React e TypeScript para apoiar tarefas de gerenciamento de uma clínica. O sistema permite organizar pacientes, consultas e registros de evolução, por meio de uma interface dividida em diferentes áreas.
+O ClinicFlow é uma aplicação web demonstrativa desenvolvida com React e TypeScript para apoiar tarefas de gerenciamento de uma clínica.
 
-A aplicação não possui backend próprio. Os dados de demonstração e as alterações realizadas durante o uso são armazenados no `localStorage` do navegador, por meio de um hook específico. Por esse motivo, o sistema tem finalidade demonstrativa e não deve ser utilizado para armazenar dados reais de pacientes.
+A aplicação não possui backend próprio. Os dados de demonstração e as alterações realizadas durante o uso são armazenados no `localStorage` do navegador, por meio do hook `useLocalStorage`. Por isso, o sistema não deve ser utilizado para armazenar dados reais de pacientes.
 
 ## Organização dos arquivos
 
@@ -18,6 +18,7 @@ src/
 ├── components/
 │   ├── AppointmentForm.tsx
 │   ├── Appointments.tsx
+│   ├── Appointments.test.tsx
 │   ├── Dashboard.tsx
 │   ├── Modal.tsx
 │   ├── NoteForm.tsx
@@ -40,72 +41,107 @@ src/
 
 | Arquivo | Responsabilidade |
 |---|---|
-| `main.tsx` | Inicializa a aplicação React e renderiza o componente principal. |
-| `App.tsx` | Coordena os estados principais, as ações do sistema, a navegação e a montagem das áreas da aplicação. |
-| `types.ts` | Define os tipos utilizados para pacientes, consultas e prontuários. |
-| `data/seed.ts` | Fornece dados fictícios para a demonstração do sistema. |
-| `hooks/useLocalStorage.ts` | Centraliza a leitura e a gravação de dados no armazenamento local do navegador. |
-| `utils/clinicHelpers.ts` | Reúne funções auxiliares utilizadas nas regras e operações da clínica. |
-| `components/Sidebar.tsx` | Apresenta o menu lateral e permite navegar entre as páginas. |
-| `components/Modal.tsx` | Apresenta janelas modais e permite seu fechamento. |
-| `components/Shared.tsx` | Reúne elementos visuais compartilhados, como campos, títulos, busca e cartões de indicadores. |
-| `components/Dashboard.tsx` | Apresenta o painel inicial com indicadores e informações das consultas. |
-| `components/Patients.tsx` | Apresenta a área de gerenciamento de pacientes. |
-| `components/Appointments.tsx` | Apresenta a área de gerenciamento de consultas. |
-| `components/Records.tsx` | Apresenta os registros de evolução clínica. |
+| `main.tsx` | Inicializa a aplicação React. |
+| `App.tsx` | Coordena estados, ações, navegação e montagem das áreas. |
+| `types.ts` | Define os tipos de pacientes, consultas e prontuários. |
+| `data/seed.ts` | Fornece dados fictícios para demonstração. |
+| `hooks/useLocalStorage.ts` | Centraliza leitura e gravação no armazenamento local. |
+| `utils/clinicHelpers.ts` | Reúne funções auxiliares, como formatação de datas e busca de pacientes. |
+| `components/Sidebar.tsx` | Apresenta o menu lateral. |
+| `components/Modal.tsx` | Controla a apresentação de janelas modais. |
+| `components/Shared.tsx` | Reúne elementos visuais compartilhados. |
+| `components/Dashboard.tsx` | Apresenta o painel inicial. |
+| `components/Patients.tsx` | Gerencia a apresentação dos pacientes. |
+| `components/Appointments.tsx` | Gerencia a apresentação das consultas. |
+| `components/Records.tsx` | Apresenta os registros de evolução. |
+| `components/PatientForm.tsx` | Formulário de cadastro de pacientes. |
+| `components/AppointmentForm.tsx` | Formulário de agendamento. |
+| `components/NoteForm.tsx` | Formulário de registro de evoluções. |
+| `App.test.tsx` | Testes de integração da aplicação. |
+| `components/Appointments.test.tsx` | Teste do mapeamento dos status das consultas. |
+| `test/setup.ts` | Configura o ambiente de testes. |
 
-| `components/PatientForm.tsx` | Contém o formulário de cadastro de pacientes. |
-| `components/AppointmentForm.tsx` | Contém o formulário de agendamento de consultas. |
-| `components/NoteForm.tsx` | Contém o formulário de registro de evoluções. |
-| `App.test.tsx` | Reúne os testes automatizados da aplicação. |
-| `test/setup.ts` | Configura o ambiente utilizado nos testes automatizados. |
-| `styles.css` | Contém os estilos visuais da interface. |
+## Arquitetura antes das refatorações
 
-## Organização das responsabilidades
+Na versão original, várias responsabilidades estavam concentradas em `App.tsx`, incluindo páginas, formulários, funções auxiliares, estados e persistência.
 
-Durante as refatorações, algumas partes que estavam concentradas no `App.tsx` foram separadas em arquivos específicos.
+```mermaid
+flowchart TD
+    A[main.tsx] --> B[App.tsx]
+    B --> C[Estados e ações]
+    B --> D[Persistência localStorage]
+    B --> E[Páginas da aplicação]
+    B --> F[Formulários]
+    B --> G[Elementos visuais]
+```
 
-As páginas passaram a ter componentes próprios, como `Dashboard`, `Patients`, `Appointments` e `Records`. Os formulários de cadastro de pacientes, agendamento e evolução também foram extraídos para componentes independentes.
+## Arquitetura após as refatorações
 
-Além disso, os elementos visuais utilizados em diferentes partes do sistema foram reunidos em `Shared.tsx`. A persistência dos dados foi centralizada no hook `useLocalStorage.ts`, enquanto as funções auxiliares foram organizadas em `clinicHelpers.ts`.
+As responsabilidades foram distribuídas entre componentes, hooks e módulos auxiliares. O `App.tsx` continua coordenando a aplicação, mas não concentra mais toda a implementação das páginas e dos formulários.
 
-Com essa divisão, cada arquivo passou a ter uma responsabilidade mais definida, facilitando a leitura e a manutenção do código.
+```mermaid
+flowchart TD
+    A[main.tsx] --> B[App.tsx]
+    B --> C[components]
+    B --> D[hooks]
+    B --> E[utils]
+    B --> F[data]
+    C --> G[Dashboard, Patients, Appointments e Records]
+    C --> H[Formulários e componentes compartilhados]
+    D --> I[useLocalStorage]
+    I --> J[localStorage do navegador]
+```
 
-## Fluxo simplificado
+## Direção das dependências
 
-1. `main.tsx` inicializa a aplicação e renderiza o componente `App`.
-2. `App.tsx` coordena os estados e utiliza o hook `useLocalStorage.ts` para carregar e persistir os dados.
-3. O usuário navega entre as áreas do sistema por meio do componente `Sidebar`.
-4. As páginas são apresentadas pelos componentes específicos, de acordo com a área selecionada.
-5. Quando necessário, `App.tsx` abre o componente `Modal`, que recebe o formulário correspondente.
-6. Os formulários enviam os dados para as funções responsáveis pelo cadastro ou registro das informações.
-7. As alterações são atualizadas nos estados e armazenadas no `localStorage`.
+A aplicação segue uma organização em que o componente principal coordena os componentes de interface e utiliza módulos auxiliares para tarefas específicas.
 
-## Dependências e limites
+- `main.tsx` inicializa a aplicação.
+- `App.tsx` coordena os estados e fornece dados e funções aos componentes.
+- Os componentes recebem propriedades para apresentar informações e executar ações.
+- O hook `useLocalStorage` concentra a persistência.
+- O módulo `clinicHelpers` fornece funções reutilizáveis.
+- O módulo `data/seed.ts` fornece os dados iniciais.
 
-A aplicação utiliza React e TypeScript para construção da interface e organização do código. Também depende do navegador para executar o sistema e armazenar os dados localmente.
+Não foi implementada uma camada de injeção de dependência. A comunicação entre os componentes ocorre principalmente por propriedades (*props*) e funções de callback.
 
-Não há, na versão atual, uma API própria ou um banco de dados em servidor. O `localStorage` é suficiente para a demonstração das funcionalidades, mas não oferece os recursos de segurança, compartilhamento e controle necessários para armazenar informações clínicas reais.
+Não foi identificada necessidade de criar uma estrutura de backend ou serviços externos para o escopo demonstrativo do projeto.
 
-## Pontos de atenção para refatoração
+## Mudanças realizadas
 
-A principal concentração de responsabilidades identificada inicialmente estava no `App.tsx`, que reunia estados, funções de interação, persistência e montagem das páginas.
+As principais alterações de organização foram:
 
-Ao longo do trabalho, parte dessas responsabilidades foi distribuída entre componentes, hooks e módulos auxiliares. Mesmo após as alterações, o `App.tsx` continua responsável por coordenar o funcionamento geral da aplicação.
+- Extração de componentes compartilhados.
+- Centralização da persistência no hook `useLocalStorage`.
+- Separação das páginas em componentes próprios.
+- Separação dos formulários.
+- Agrupamento dos parâmetros do Dashboard em objetos `data` e `actions`.
+- Substituição da condicional ternária encadeada dos status por um objeto de mapeamento.
 
-As refatorações foram realizadas gradualmente, procurando manter o comportamento existente. Para verificar possíveis impactos, foram executados o build, os testes automatizados e o linter após as alterações.
+Essas mudanças reduziram a concentração de código no arquivo principal e deixaram as responsabilidades mais claras.
+
+## Impacto nos testes
+
+A separação dos componentes facilitou a validação de comportamentos específicos. Os testes existentes verificam indicadores do painel, filtros, cadastro, persistência, conclusão de consultas, histórico, exclusão de pacientes e mapeamento dos status.
+
+A cobertura atual é de 80,65% para instruções e linhas, 81,73% para branches e 63,49% para funções.
+
+## Limites da arquitetura
+
+O sistema não possui API própria nem banco de dados em servidor. O armazenamento local é utilizado apenas para demonstração e não oferece os controles de segurança e compartilhamento necessários para informações clínicas reais.
+
+O `App.tsx` ainda coordena diversas operações e permanece como ponto central da aplicação. Essa responsabilidade é compatível com o tamanho atual do projeto, mas pode ser reavaliada caso novas funcionalidades sejam adicionadas.
 
 ## Evidências
 
-- Inicialização da aplicação: `src/main.tsx`.
+- Inicialização: `src/main.tsx`.
 - Componente principal: `src/App.tsx`.
-- Persistência local: `src/hooks/useLocalStorage.ts`.
+- Persistência: `src/hooks/useLocalStorage.ts`.
 - Funções auxiliares: `src/utils/clinicHelpers.ts`.
-- Tipos: `src/types.ts`.
-- Dados demonstrativos: `src/data/seed.ts`.
-- Componentes e formulários: `src/components/`.
-- Testes automatizados: `src/App.test.tsx`.
+- Componentes: `src/components/`.
+- Testes: `src/App.test.tsx` e `src/components/Appointments.test.tsx`.
+- Histórico das alterações: PRs de refatoração no GitHub.
 
 ## Roteiro de 1 minuto
 
-O ClinicFlow foi desenvolvido com React e TypeScript. Inicialmente, boa parte das responsabilidades estava concentrada no arquivo `App.tsx`. Durante o trabalho de refatoração, separamos as páginas, os formulários e os componentes compartilhados, além de organizar a persistência dos dados em um hook e as funções auxiliares em um módulo próprio. Essa organização tornou o código mais dividido e facilitou sua manutenção. Como o sistema utiliza o armazenamento local do navegador e não possui backend, continua sendo uma aplicação demonstrativa, sem indicação de uso com dados reais de pacientes.
+Na versão original, grande parte do sistema estava concentrada no `App.tsx`. Durante as refatorações, separamos as páginas, formulários e elementos compartilhados, além de centralizar a persistência em um hook. Também organizamos os parâmetros do Dashboard e simplificamos a lógica dos status das consultas. O sistema continua utilizando o armazenamento local do navegador e não possui backend, sendo destinado apenas à demonstração.
