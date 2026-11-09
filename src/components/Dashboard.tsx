@@ -12,27 +12,40 @@ import {
   getPatientName,
 } from "../utils/clinicHelpers";
 
-type DashboardProps = {
+type DashboardData = {
   patients: Patient[];
   appointments: Appointment[];
   activePatients: number;
   completed: number;
   upcoming: number;
+};
+
+type DashboardActions = {
   onNewAppointment: () => void;
   onNewPatient: () => void;
   onFinish: (id: string) => void;
 };
 
-export default function Dashboard({
-  patients,
-  appointments,
-  activePatients,
-  completed,
-  upcoming,
-  onNewAppointment,
-  onNewPatient,
-  onFinish,
-}: DashboardProps) {
+type DashboardProps = {
+  data: DashboardData;
+  actions: DashboardActions;
+};
+
+export default function Dashboard({ data, actions }: DashboardProps) {
+  const {
+    patients,
+    appointments,
+    activePatients,
+    completed,
+    upcoming,
+  } = data;
+
+  const {
+    onNewAppointment,
+    onNewPatient,
+    onFinish,
+  } = actions;
+
   return <>
     <PageHeading eyebrow="SEGUNDA-FEIRA, 09 DE NOVEMBRO DE 2026" title="Bom dia, Beatriz"
       description="Aqui está um resumo do que acontece no seu consultório hoje."
