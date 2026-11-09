@@ -64,3 +64,25 @@ O sistema foi desenvolvido para fins acadêmicos. Antes de utilizá-lo em uma at
 ## Licença
 
 MIT — consulte o arquivo [LICENSE](./LICENSE).
+
+## Testes e verificações
+
+Instale as dependências do projeto:
+
+```bash
+npm install
+```
+
+Execute a suíte automatizada:
+
+```bash
+npm run test
+```
+
+Execute os testes com relatório de cobertura:
+
+```bash
+npm run test:coverage
+```
+
+O relatório HTML de cobertura é gerado em `coverage/`. A configuração utiliza Vitest, React Testing Library, jsdom e o provedor V8. Os testes cobrem a renderização do painel, pesquisa de pacientes, cadastro e persistência local, conclusão de consultas, filtro de evoluções e confirmação de exclusão.
