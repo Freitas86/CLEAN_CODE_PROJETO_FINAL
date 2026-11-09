@@ -15,15 +15,16 @@ Registrar os problemas de organização identificados na versão inicial do Clin
 
 | ID | Code Smell | Categoria | Evidência na versão original | Situação |
 |---|---|---|---|---|
-| CF-01 | Large Class | Inchaços | `App.tsx` concentrava estados, persistência, ações e páginas. | Melhorado |
-| CF-02 | Long Method | Inchaços | A função `App()` reunia diversas operações e uma estrutura extensa de interface. | Melhorado, ainda existe concentração de responsabilidades. |
-| CF-03 | Long Parameter List | Inchaços | `Dashboard` recebia oito propriedades individualmente. | Melhorado na PR #11. |
-| CF-04 | Switch Statements | Abusos da OO | A navegação utilizava condicionais simples, sem estrutura `switch/case`. | Não confirmado como Code Smell. |
-| CF-05 | Divergent Change | Impedidores de Mudança | Alterações em diferentes responsabilidades frequentemente exigiam modificações em `App.tsx`. | Melhorado. |
-| CF-06 | Duplicate Code | Dispensáveis | Três efeitos separados realizavam a persistência de pacientes, consultas e evoluções. | Resolvido com `useLocalStorage`. |
-| CF-07 | Feature Envy | Acopladores | `getPatientName()` consultava a lista de pacientes recebida como parâmetro. | Não confirmado como Code Smell. |
+| CF-01 | Large Class | Bloaters | `App.tsx` concentrava estados, persistência, ações e páginas. | Melhorado com extração de componentes. |
+| CF-02 | Long Method | Bloaters | A função `App()` reunia diversas operações e uma estrutura extensa de interface. | Melhorado parcialmente com a separação de componentes e formulários. |
+| CF-03 | Long Parameter List | Bloaters | `Dashboard` recebia oito propriedades individualmente. | Refatorado na PR #11. |
+| CF-04 | Switch Statements | Object-Orientation Abusers | Condicionais ternárias encadeadas selecionavam a classe visual conforme o status da consulta. | Simplificado na PR #12 com o objeto `STATUS_CLASSES`. |
+| CF-05 | Divergent Change | Change Preventers | Alterações de interface, persistência e regras de negócio exigiam modificações no mesmo arquivo `App.tsx`. | Melhorado com a separação de responsabilidades. |
+| CF-07 | Feature Envy | Couplers | `getPatientName()` trabalhava diretamente sobre a coleção de pacientes, embora estivesse junto às funções gerais da aplicação. | Extraída para `clinicHelpers.ts`, melhorando a organização da responsabilidade. |
 
-A análise foi conservadora: os itens CF-04 e CF-07 foram mantidos como possibilidades investigadas, mas não foram apresentados como problemas comprovados.
+O projeto também apresentou o smell `Duplicate Code`, registrado como melhoria complementar. Os três efeitos responsáveis pela persistência de pacientes, consultas e evoluções foram substituídos pelo hook `useLocalStorage`.
+
+**Observação:** o caso de Feature Envy é uma adaptação do conceito ao contexto funcional de React e TypeScript. Não representa o exemplo clássico de um método de uma classe que acessa excessivamente outra classe. Da mesma forma, o caso de Switch Statements foi identificado pela presença de condicionais encadeadas, e não por uma estrutura literal `switch/case`.
 
 ## Principais refatorações
 
@@ -77,25 +78,39 @@ O componente `Dashboard` recebia oito propriedades individualmente, misturando i
 
 Introdução de objeto de parâmetros (*Introduce Parameter Object*).
 
-**Antes**
-
-O componente recebia propriedades como `patients`, `appointments`, `activePatients`, `completed`, `upcoming`, `onNewAppointment`, `onNewPatient` e `onFinish`.
-
-**Depois**
+**Resultado**
 
 As propriedades foram agrupadas em dois objetos:
 
 - `data`: informações utilizadas pelo painel.
 - `actions`: funções executadas pelas ações do painel.
 
-**Resultado**
-
 A chamada do componente ficou mais organizada e os parâmetros passaram a ter agrupamentos por finalidade.
 
 **Evidência**
 
 - Arquivo: `src/components/Dashboard.tsx`.
-- PR #11: [Agrupamento dos parâmetros do Dashboard](https://github.com/Freitas86/CLEAN_CODE_PROJETO_FINAL/pull/11).
+- PR #11.
+
+### CF-04 — Switch Statements
+
+**Problema encontrado**
+
+Na versão original, a apresentação do status das consultas utilizava condicionais ternárias encadeadas para determinar a classe visual de cada situação.
+
+**Técnica aplicada**
+
+Simplificação da lógica condicional por meio de um objeto de mapeamento.
+
+**Resultado**
+
+A lógica foi substituída pelo objeto `STATUS_CLASSES`, relacionando cada status à sua classe visual. Também foram adicionados testes para verificar os três estados possíveis: agendada, concluída e cancelada.
+
+**Evidência**
+
+- Antes: `src/App.tsx`, branch `original`.
+- Depois: objeto `STATUS_CLASSES`.
+- PR #12.
 
 ### CF-05 — Divergent Change
 
@@ -113,78 +128,48 @@ Páginas, formulários e elementos compartilhados passaram a ser mantidos em arq
 
 **Evidência**
 
-- Arquivo original: `src/App.tsx`.
-- Estrutura atual: `src/components/`, `src/hooks/` e `src/utils/`.
-- PRs #5, #6, #7 e #8.
+- Antes: `src/App.tsx`, branch `original`.
+- Depois: `src/components/`.
+- PRs #5, #7 e #8.
 
-### CF-06 — Duplicate Code
+### CF-07 — Feature Envy
 
 **Problema encontrado**
 
-A versão original possuía três efeitos separados para salvar pacientes, consultas e evoluções no `localStorage`.
+A função `getPatientName()` estava localizada junto às funções gerais da aplicação, mas sua responsabilidade era consultar exclusivamente os dados de pacientes, procurando um registro pelo identificador.
 
 **Técnica aplicada**
 
-Extração da lógica repetida para uma função reutilizável, implementada como hook personalizado.
+Extração da função para um módulo de utilitários compartilhado.
 
 **Resultado**
 
-A persistência passou a ser centralizada em `useLocalStorage`, reduzindo a repetição da mesma lógica.
+A função passou a ser mantida em `src/utils/clinicHelpers.ts`, junto às funções auxiliares utilizadas pelos componentes. Essa organização deixa mais clara sua responsabilidade relacionada aos dados de pacientes.
 
 **Evidência**
 
-- Antes: três efeitos em `src/App.tsx`.
+- Antes: função definida em `src/App.tsx`, branch `original`.
+- Depois: `src/utils/clinicHelpers.ts`.
+- Utilização em `App`, `Appointments`, `Dashboard` e `Records`.
+
+**Observação:** a classificação como Feature Envy é uma interpretação do conceito no contexto funcional do projeto, não um exemplo clássico de orientação a objetos.
+
+### Melhoria complementar — Duplicate Code
+
+**Problema encontrado**
+
+Três efeitos separados realizavam a gravação dos dados de pacientes, consultas e evoluções no `localStorage`, repetindo a mesma lógica.
+
+**Técnica aplicada**
+
+Extração da lógica compartilhada para um hook personalizado.
+
+**Resultado**
+
+A persistência passou a ser centralizada em `useLocalStorage`, reduzindo a repetição da lógica e facilitando a manutenção.
+
+**Evidência**
+
+- Antes: três efeitos em `src/App.tsx`, branch `original`.
 - Depois: `src/hooks/useLocalStorage.ts`.
 - PR #6.
-
-## Refatoração adicional: simplificação dos status
-
-Além dos itens analisados, foi simplificada a condição ternária encadeada utilizada para definir as classes CSS dos status das consultas.
-
-**Antes**
-
-A lógica verificava individualmente se a consulta estava concluída, cancelada ou agendada.
-
-**Depois**
-
-Foi criado o objeto `STATUS_CLASSES`, que relaciona cada status à respectiva classe CSS.
-
-**Resultado**
-
-A associação ficou mais direta e o comportamento passou a ser verificado por teste automatizado.
-
-**Evidência**
-
-- Arquivo: `src/components/Appointments.tsx`.
-- PR #12: [Simplificação dos status das consultas](https://github.com/Freitas86/CLEAN_CODE_PROJETO_FINAL/pull/12).
-- Teste: `src/components/Appointments.test.tsx`.
-
-## Resultado geral
-
-| Item | Resultado |
-|---|---|
-| CF-01 | Melhorou a distribuição das responsabilidades. |
-| CF-02 | Reduziu a extensão e a concentração da implementação. |
-| CF-03 | Agrupou os parâmetros do Dashboard em dois objetos. |
-| CF-04 | Não confirmado; não foi identificado `switch/case` na navegação. |
-| CF-05 | Reduziu a concentração de responsabilidades no arquivo principal. |
-| CF-06 | Centralizou a persistência e eliminou a repetição dos três efeitos. |
-| CF-07 | Não confirmado; a função auxiliar realiza uma busca simples na lista recebida. |
-
-A análise identificou cinco problemas com evidências suficientes e duas possibilidades que não foram confirmadas. A simplificação da condição dos status também foi realizada como melhoria adicional.
-
-## Evidências
-
-- Versão original: branch `original`.
-- Versão atual: branch `main`.
-- PR #5: extração de componentes.
-- PR #6: centralização da persistência.
-- PR #7: separação das páginas.
-- PR #8: separação dos formulários.
-- PR #11: agrupamento dos parâmetros do Dashboard.
-- PR #12: simplificação dos status e teste automatizado.
-- Testes: `npm test`.
-
-## Roteiro de 1 minuto
-
-Na análise inicial, identificamos concentração de responsabilidades no `App.tsx`, repetição na persistência e excesso de parâmetros no Dashboard. Durante as refatorações, extraímos componentes, centralizamos o armazenamento em um hook e agrupamos os parâmetros do painel. Também simplificamos a lógica dos status das consultas. Dois itens inicialmente considerados foram descartados como Code Smells por falta de evidência suficiente.
