@@ -4,13 +4,15 @@ import { useLocalStorage } from "./hooks/useLocalStorage";
 import {
   Bell, Check, Menu, X,
 } from "lucide-react";
-import { Field } from "./components/Shared";
 import Sidebar, { type Page } from "./components/Sidebar";
 import Modal from "./components/Modal";
 import Dashboard from "./components/Dashboard";
 import Patients from "./components/Patients";
 import Appointments from "./components/Appointments";
 import Records from "./components/Records";
+import PatientForm from "./components/PatientForm";
+import AppointmentForm from "./components/AppointmentForm";
+import NoteForm from "./components/NoteForm";
 import { initialAppointments, initialNotes, initialPatients } from "./data/seed";
 import type { Appointment, ClinicalNote, Patient } from "./types";
 import { getPatientName } from "./utils/clinicHelpers";
@@ -231,21 +233,10 @@ export default function App() {
           subtitle="Preencha os dados para cadastrar um paciente."
           onClose={() => setModal(null)}
         >
-          <form className="form-grid" onSubmit={addPatient}>
-            <Field label="Nome completo" name="name" placeholder="Ex.: Ana Souza" required />
-            <Field label="E-mail" name="email" type="email" placeholder="ana@email.com" required />
-            <Field label="Telefone" name="phone" placeholder="(00) 00000-0000" required />
-            <Field label="Data de nascimento" name="birthDate" type="date" required />
-
-            <div className="form-actions">
-              <button type="button" className="button secondary" onClick={() => setModal(null)}>
-                Cancelar
-              </button>
-              <button className="button primary" type="submit">
-                Salvar paciente
-              </button>
-            </div>
-          </form>
+          <PatientForm
+            onSubmit={addPatient}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
 
@@ -255,39 +246,11 @@ export default function App() {
           subtitle="Organize um novo horário na agenda."
           onClose={() => setModal(null)}
         >
-          <form className="form-grid" onSubmit={addAppointment}>
-            <label className="field full">
-              <span>Paciente</span>
-              <select name="patientId" required defaultValue="">
-                <option value="" disabled>Selecione um paciente</option>
-                {patients.filter((p) => p.status === "Ativo").map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-            </label>
-
-            <Field label="Data" name="date" type="date" required />
-            <Field label="Horário" name="time" type="time" required />
-
-            <label className="field full">
-              <span>Tipo de atendimento</span>
-              <select name="type">
-                <option>Psicoterapia</option>
-                <option>Acompanhamento</option>
-                <option>Avaliação inicial</option>
-                <option>Retorno</option>
-              </select>
-            </label>
-
-            <div className="form-actions">
-              <button type="button" className="button secondary" onClick={() => setModal(null)}>
-                Cancelar
-              </button>
-              <button className="button primary" type="submit">
-                Confirmar agendamento
-              </button>
-            </div>
-          </form>
+          <AppointmentForm
+            patients={patients}
+            onSubmit={addAppointment}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
 
@@ -297,38 +260,11 @@ export default function App() {
           subtitle="Registre informações relevantes do atendimento."
           onClose={() => setModal(null)}
         >
-          <form className="form-grid" onSubmit={addNote}>
-            <label className="field full">
-              <span>Paciente</span>
-              <select name="patientId" required defaultValue="">
-                <option value="" disabled>Selecione um paciente</option>
-                {patients.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-            </label>
-
-            <Field label="Título" name="title" placeholder="Ex.: Evolução semanal" required />
-
-            <label className="field full">
-              <span>Descrição da evolução</span>
-              <textarea
-                name="content"
-                rows={5}
-                placeholder="Registre a evolução do atendimento..."
-                required
-              />
-            </label>
-
-            <div className="form-actions">
-              <button type="button" className="button secondary" onClick={() => setModal(null)}>
-                Cancelar
-              </button>
-              <button className="button primary" type="submit">
-                Salvar evolução
-              </button>
-            </div>
-          </form>
+          <NoteForm
+            patients={patients}
+            onSubmit={addNote}
+            onCancel={() => setModal(null)}
+          />
         </Modal>
       )}
 
