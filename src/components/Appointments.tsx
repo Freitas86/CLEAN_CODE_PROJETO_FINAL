@@ -4,11 +4,17 @@ import {
   PageHeading,
   SearchBox,
 } from "./Shared";
-import type { Appointment, Patient } from "../types";
+import type { Appointment, AppointmentStatus, Patient } from "../types";
 import {
   formatDate,
   getPatientName,
 } from "../utils/clinicHelpers";
+
+const STATUS_CLASSES: Record<AppointmentStatus, string> = {
+  Agendada: "scheduled",
+  Concluída: "completed",
+  Cancelada: "inactive",
+};
 
 type AppointmentsProps = {
   appointments: Appointment[];
@@ -80,15 +86,9 @@ export default function Appointments({
                   <td>{item.time}</td>
                   <td>{item.type}</td>
                   <td>
-                    <span className={`status ${
-                      item.status === "Concluída"
-                        ? "completed"
-                        : item.status === "Cancelada"
-                          ? "inactive"
-                          : "scheduled"
-                    }`}>
-                      {item.status}
-                    </span>
+		  <span className={`status ${STATUS_CLASSES[item.status]}`}>
+		    {item.status}
+		  </span>
                   </td>
                   <td>
                     {item.status === "Agendada" && (
