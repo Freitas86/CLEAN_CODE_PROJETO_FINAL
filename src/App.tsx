@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 import {
   Bell, CalendarDays, Check, ChevronDown,
   Menu, Plus, Users, X,
@@ -17,15 +18,6 @@ import type { Appointment, ClinicalNote, Patient } from "./types";
 
 const STORAGE_KEYS = { patients: "clinicflow-patients", appointments: "clinicflow-appointments", notes: "clinicflow-notes" };
 
-function readStorage<T>(key: string, fallback: T): T {
-  try {
-    const stored = localStorage.getItem(key);
-    return stored ? JSON.parse(stored) as T : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
 function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 }
@@ -41,18 +33,14 @@ function getPatientName(patientId: string, patients: Patient[]) {
 
 export default function App() {
   const [activePage, setActivePage] = useState<Page>("dashboard");
-  const [patients, setPatients] = useState<Patient[]>(() => readStorage(STORAGE_KEYS.patients, initialPatients));
-  const [appointments, setAppointments] = useState<Appointment[]>(() => readStorage(STORAGE_KEYS.appointments, initialAppointments));
-  const [notes, setNotes] = useState<ClinicalNote[]>(() => readStorage(STORAGE_KEYS.notes, initialNotes));
+  const [patients, setPatients] = useLocalStorage(STORAGE_KEYS.patients, initialPatients);
+  const [appointments, setAppointments] = useLocalStorage(STORAGE_KEYS.appointments, initialAppointments);
+  const [notes, setNotes] = useLocalStorage(STORAGE_KEYS.notes, initialNotes);
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<"patient" | "appointment" | "note" | null>(null);
   const [selectedPatient, setSelectedPatient] = useState("");
   const [mobileMenu, setMobileMenu] = useState(false);
   const [toast, setToast] = useState("");
-
-  useEffect(() => { localStorage.setItem(STORAGE_KEYS.patients, JSON.stringify(patients)); }, [patients]);
-  useEffect(() => { localStorage.setItem(STORAGE_KEYS.appointments, JSON.stringify(appointments)); }, [appointments]);
-  useEffect(() => { localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(notes)); }, [notes]);
 
   const today = "2026-11-09";
   const todaysAppointments = useMemo(() => appointments
