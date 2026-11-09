@@ -179,15 +179,19 @@ export default function App() {
         <div className="content">
           {activePage === "dashboard" && (
             <Dashboard
-              patients={patients}
-              appointments={todaysAppointments}
-              activePatients={activePatients}
-              completed={completed}
-              upcoming={upcoming}
-              onNewAppointment={() => setModal("appointment")}
-              onNewPatient={() => setModal("patient")}
-              onFinish={(id) => updateAppointmentStatus(id, "Concluída")}
-            />
+data={{
+patients,
+appointments: todaysAppointments,
+activePatients,
+completed,
+upcoming,
+      }}
+      actions={{
+onNewAppointment: () => setModal("appointment"),
+onNewPatient: () => setModal("patient"),
+onFinish: (id) => updateAppointmentStatus(id, "Concluída"),
+      }}
+    />
           )}
 
           {activePage === "patients" && (
