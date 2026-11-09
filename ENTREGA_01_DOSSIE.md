@@ -14,7 +14,7 @@
 
 | Integrante | Participação |
 |---|---|
-| Gustavo Freitas | Trabalho individual|
+| Gustavo Rocha de Freitas | Trabalho individual|
 
 ### Repositório
 
