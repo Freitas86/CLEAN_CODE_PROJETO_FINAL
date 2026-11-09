@@ -46,3 +46,29 @@ Não considerar um item como resolvido apenas porque o código foi movido para o
 ## Roteiro de 1 minuto
 
 Na análise inicial, o principal ponto encontrado foi a concentração de responsabilidades no `App.tsx`. A função principal controla estados, persistência e várias partes da interface. Também existem três efeitos semelhantes para salvar dados no armazenamento local e um componente que recebe várias propriedades. Alguns outros itens foram mantidos como candidatos, porque não basta encontrar uma condicional ou uma função que consulta uma lista para afirmar que existe um Code Smell. A ideia é refatorar somente o que tiver justificativa no código.
+
+## Situação após as refatorações
+
+Após as alterações realizadas no projeto, os itens identificados inicialmente foram revisados considerando a estrutura atual do código.
+
+| ID | Code Smell | Situação atual | Justificativa |
+|---|---|---|---|
+| CF-01 | Large Class | Melhorado | Parte das responsabilidades que estavam concentradas no `App.tsx` foi distribuída entre componentes, hooks e módulos auxiliares. |
+| CF-02 | Long Method | Melhorado, mas ainda presente | A extração das páginas e dos formulários reduziu o tamanho da função principal. Mesmo assim, `App()` ainda reúne estados, funções de manipulação e a montagem da interface. |
+| CF-03 | Long Parameter List | Candidato | O `Dashboard` recebe oito propriedades. Entretanto, elas possuem finalidades distintas e são utilizadas pelo componente. Não foi realizada uma alteração apenas para reduzir essa quantidade. |
+| CF-04 | Switch Statements | Não confirmado | A seleção das páginas utiliza condicionais com `activePage`. A lógica atual é simples e não apresenta complexidade suficiente para justificar uma refatoração específica. |
+| CF-05 | Divergent Change | Melhorado | A separação das páginas, formulários e elementos compartilhados reduziu a necessidade de concentrar alterações de diferentes áreas no `App.tsx`. |
+| CF-06 | Duplicate Code | Resolvido | Os efeitos semelhantes de persistência foram substituídos pelo hook `useLocalStorage.ts`, que centraliza essa responsabilidade. |
+| CF-07 | Feature Envy | Não confirmado | A função `getPatientName()` realiza uma busca simples na lista de pacientes. Não há evidência suficiente de que esteja assumindo responsabilidades inadequadas. |
+
+### Resultado das refatorações
+
+A principal mudança foi a redução da concentração de responsabilidades no arquivo `App.tsx`. As páginas e os formulários passaram a ter componentes próprios, os elementos visuais compartilhados foram organizados em `Shared.tsx` e a persistência dos dados foi centralizada em um hook.
+
+O `App.tsx` ainda mantém a coordenação geral da aplicação, incluindo estados, operações e navegação. Portanto, os itens CF-01 e CF-02 foram melhorados, mas não devem ser considerados completamente eliminados.
+
+O item CF-06 foi resolvido com a criação do hook de persistência. Os itens CF-03, CF-04 e CF-07 foram mantidos como candidatos ou não confirmados, pois não foi encontrada justificativa suficiente para realizar novas alterações.
+
+### Roteiro atualizado para apresentação
+
+Na análise inicial, encontramos uma concentração de responsabilidades no `App.tsx`, além de trechos semelhantes responsáveis pela persistência dos dados. Durante as refatorações, separamos as páginas, os formulários e os componentes compartilhados, além de criar um hook para centralizar o armazenamento local. Com isso, conseguimos melhorar a organização do projeto e resolver a duplicação da persistência. Alguns pontos permaneceram como candidatos, porque não apresentavam evidências suficientes para justificar novas alterações. A intenção foi melhorar o código sem modificar partes que já estavam funcionando corretamente.
