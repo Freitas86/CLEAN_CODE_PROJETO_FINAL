@@ -1,8 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  ArrowDownRight, ArrowUpRight, Bell, CalendarDays, Check, ChevronDown,
-  Menu, Plus, Search, Users, X,
+  Bell, CalendarDays, Check, ChevronDown,
+  Menu, Plus, Users, X,
 } from "lucide-react";
+import {
+  ActivityIcon,
+  Field,
+  PageHeading,
+  SearchBox,
+  StatCard,
+} from "./components/Shared";
 import Sidebar, { type Page } from "./components/Sidebar";
 import Modal from "./components/Modal";
 import { initialAppointments, initialNotes, initialPatients } from "./data/seed";
@@ -174,18 +181,6 @@ function pageTitle(page: Page) {
   return "Visão geral";
 }
 
-function Field({ label, name, placeholder, type = "text", required = false }: {
-  label: string; name: string; placeholder?: string; type?: string; required?: boolean;
-}) {
-  return <label className="field"><span>{label}</span><input name={name} type={type} placeholder={placeholder} required={required} /></label>;
-}
-
-function PageHeading({ eyebrow, title, description, action }: {
-  eyebrow: string; title: string; description: string; action?: React.ReactNode;
-}) {
-  return <div className="page-heading"><div><div className="eyebrow">{eyebrow}</div><h1>{title}</h1><p>{description}</p></div>{action}</div>;
-}
-
 function Dashboard({ patients, appointments, activePatients, completed, upcoming, onNewAppointment, onNewPatient, onFinish }: {
   patients: Patient[]; appointments: Appointment[]; activePatients: number; completed: number; upcoming: number;
   onNewAppointment: () => void; onNewPatient: () => void; onFinish: (id: string) => void;
@@ -224,16 +219,6 @@ function Dashboard({ patients, appointments, activePatients, completed, upcoming
       </tbody></table></div>
     </section>
   </>;
-}
-
-function ActivityIcon() {
-  return <span className="activity-symbol">◷</span>;
-}
-
-function StatCard({ label, value, detail, icon, trend }: {
-  label: string; value: string; detail: string; icon: React.ReactNode; trend: "up" | "down";
-}) {
-  return <div className="stat-card"><div className="stat-top"><span>{label}</span><div className="stat-icon">{icon}</div></div><div className="stat-value">{value}</div><div className="stat-detail">{trend === "up" ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}{detail}</div></div>;
 }
 
 function Patients({ patients, search, setSearch, onAdd, onDelete, onOpen }: {
@@ -283,10 +268,6 @@ function Records({ notes, patients, onAdd, selectedPatient, onSelect }: {
     </section>
     <p className="privacy-note">Ambiente demonstrativo. Utilize apenas dados fictícios; não registre informações clínicas reais.</p>
   </>;
-}
-
-function SearchBox({ value, onChange, placeholder }: { value: string; onChange: (value: string) => void; placeholder: string }) {
-  return <label className="search-box"><Search size={17} /><input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />{value && <button onClick={() => onChange("")} aria-label="Limpar busca"><X size={14} /></button>}</label>;
 }
 
 function getInitials(name: string) {
